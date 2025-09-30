@@ -21,12 +21,20 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog,
                                QVBoxLayout, QWidget)
 import PySide6.QtAsyncio as QtAsyncio
 import asyncio
-import windows_toasts
 import concurrent.futures
+import sys
 
 from notify import Worker
 
-notifier = windows_toasts.WindowsToaster("Tech Demo")
+
+import sys
+
+if sys.platform.startswith("win"):
+    import windows_toasts
+    notifier = windows_toasts.WindowsToaster("Tech Demo")
+else:
+    from plyer import notification
+    notifier = None
 
 currentTemperature = 25.00
 currentPressure = 760.00
@@ -288,16 +296,29 @@ class Ui_TechDemoMainWindow(object):
 
 
     def showNotification(self, messageType):
-        notification = windows_toasts.Toast()
-
-        if messageType == "success":
-            notification.text_fields = ["SUCCESS", "Temperature and pressure reached."]
-        elif messageType == "unsafe":
-            notification.text_fields = ["FAILURE", "Unsafe environment: Temperature or pressure exceeded 1000."]
+        if sys.platform.startswith("win"):
+            notification_toast = windows_toasts.Toast()
+            if messageType == "success":
+                notification_toast.text_fields = ["SUCCESS", "Temperature and pressure reached."]
+            elif messageType == "unsafe":
+                notification_toast.text_fields = ["FAILURE", "Unsafe environment: Temperature or pressure exceeded 1000."]
+            else:
+                notification_toast.text_fields = ["FAILURE", "Failed to reach temperature or pressure in safe time."]
+            notifier.show_toast(notification_toast)
         else:
-            notification.text_fields = ["FAILURE", "Failed to reach temperature or pressure in safe time."]
+            # macOS/Linux fallback using plyer
+            if messageType == "success":
+                title, message = "SUCCESS", "Temperature and pressure reached."
+            elif messageType == "unsafe":
+                title, message = "FAILURE", "Unsafe environment: Temperature or pressure exceeded 1000."
+            else:
+                title, message = "FAILURE", "Failed to reach temperature or pressure in safe time."
 
-        notifier.show_toast(notification)
+            notification.notify(
+                title=title,
+                message=message,
+                app_name="Tech Demo"
+            )
 
     def ButtonClickedAsync(self):
         self.Worker = Worker(currentTemperature, currentPressure, self.tempValueSelector.value(), self.pressureValueSelector.value())
