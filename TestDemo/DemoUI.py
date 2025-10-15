@@ -35,23 +35,77 @@ class Ui_TechDemoMainWindow(object):
         self.MainLayout.setContentsMargins(0, 0, 0, 0)
         self.TopHalfLayout = QHBoxLayout()
         self.TopHalfLayout.setObjectName(u"TopHalfLayout")
-        self.TopHalfLayout.setContentsMargins(-1, 25, -1, 25)
+        self.TopHalfLayout.setContentsMargins(-1, 0, -1, 25)
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.CurrentPressureTempValues = QVBoxLayout()
+        self.CurrentPressureTempValues.setSpacing(25)
+        self.CurrentPressureTempValues.setObjectName(u"CurrentPressureTempValues")
+        self.CurrentPressureTempValues.setContentsMargins(0, -1, -1, -1)
+        self.TempVert = QVBoxLayout()
+        self.TempVert.setObjectName(u"TempVert")
+        self.TempVert.setContentsMargins(0, -1, -1, -1)
+        self.label = QLabel(self.verticalLayoutWidget)
+        self.label.setObjectName(u"label")
+        font = QFont()
+        font.setPointSize(16)
+        self.label.setFont(font)
+
+        self.TempVert.addWidget(self.label)
+
+        self.label_2 = QLabel(self.verticalLayoutWidget)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setFont(font)
+        self.label_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.TempVert.addWidget(self.label_2)
+
+
+        self.CurrentPressureTempValues.addLayout(self.TempVert)
+
+        self.PressureVert = QVBoxLayout()
+        self.PressureVert.setObjectName(u"PressureVert")
+        self.PressureVert.setContentsMargins(0, -1, -1, -1)
+        self.label_4 = QLabel(self.verticalLayoutWidget)
+        self.label_4.setObjectName(u"label_4")
+        self.label_4.setFont(font)
+
+        self.PressureVert.addWidget(self.label_4)
+
+        self.label_3 = QLabel(self.verticalLayoutWidget)
+        self.label_3.setObjectName(u"label_3")
+        self.label_3.setFont(font)
+        self.label_3.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.PressureVert.addWidget(self.label_3)
+
+
+        self.CurrentPressureTempValues.addLayout(self.PressureVert)
+
+
+        self.horizontalLayout.addLayout(self.CurrentPressureTempValues)
+
         self.AutoManualToggleVertLayout = QVBoxLayout()
         self.AutoManualToggleVertLayout.setSpacing(0)
         self.AutoManualToggleVertLayout.setObjectName(u"AutoManualToggleVertLayout")
         self.AutoManualToggleVertLayout.setContentsMargins(25, -1, -1, -1)
         self.autoToggleBox = QCheckBox(self.verticalLayoutWidget)
         self.autoToggleBox.setObjectName(u"autoToggleBox")
+        self.autoToggleBox.setFont(font)
 
         self.AutoManualToggleVertLayout.addWidget(self.autoToggleBox)
 
         self.manualToggleBox = QCheckBox(self.verticalLayoutWidget)
         self.manualToggleBox.setObjectName(u"manualToggleBox")
+        self.manualToggleBox.setFont(font)
 
         self.AutoManualToggleVertLayout.addWidget(self.manualToggleBox)
 
 
-        self.TopHalfLayout.addLayout(self.AutoManualToggleVertLayout)
+        self.horizontalLayout.addLayout(self.AutoManualToggleVertLayout)
+
+
+        self.TopHalfLayout.addLayout(self.horizontalLayout)
 
 
         self.MainLayout.addLayout(self.TopHalfLayout)
@@ -72,20 +126,20 @@ class Ui_TechDemoMainWindow(object):
         self.TempLayoutBox = QGroupBox(self.verticalLayoutWidget)
         self.TempLayoutBox.setObjectName(u"TempLayoutBox")
         self.TempLayoutBox.setEnabled(True)
-        font = QFont()
-        font.setKerning(False)
-        font.setHintingPreference(QFont.PreferDefaultHinting)
-        self.TempLayoutBox.setFont(font)
+        font1 = QFont()
+        font1.setKerning(False)
+        font1.setHintingPreference(QFont.PreferDefaultHinting)
+        self.TempLayoutBox.setFont(font1)
         self.TempLayoutBox.setStyleSheet(u"QGroupBox#TempLayoutBox {border:0;}")
         self.TempLayoutBox.setFlat(False)
         self.tempTextLabel = QLabel(self.TempLayoutBox)
         self.tempTextLabel.setObjectName(u"tempTextLabel")
         self.tempTextLabel.setGeometry(QRect(0, 9, 171, 31))
-        font1 = QFont()
-        font1.setPointSize(16)
-        font1.setKerning(True)
-        font1.setHintingPreference(QFont.PreferDefaultHinting)
-        self.tempTextLabel.setFont(font1)
+        font2 = QFont()
+        font2.setPointSize(16)
+        font2.setKerning(True)
+        font2.setHintingPreference(QFont.PreferDefaultHinting)
+        self.tempTextLabel.setFont(font2)
         self.tempTextLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.tempUnitSelector = QComboBox(self.TempLayoutBox)
         self.tempUnitSelector.setObjectName(u"tempUnitSelector")
@@ -107,9 +161,7 @@ class Ui_TechDemoMainWindow(object):
         self.pressureTextLabel = QLabel(self.PressureLayoutBox)
         self.pressureTextLabel.setObjectName(u"pressureTextLabel")
         self.pressureTextLabel.setGeometry(QRect(0, 9, 171, 31))
-        font2 = QFont()
-        font2.setPointSize(16)
-        self.pressureTextLabel.setFont(font2)
+        self.pressureTextLabel.setFont(font)
         self.pressureTextLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.pressureUnitSelector = QComboBox(self.PressureLayoutBox)
         self.pressureUnitSelector.setObjectName(u"pressureUnitSelector")
@@ -143,8 +195,12 @@ class Ui_TechDemoMainWindow(object):
 
     def retranslateUi(self, TechDemoMainWindow):
         TechDemoMainWindow.setWindowTitle(QCoreApplication.translate("TechDemoMainWindow", u"Dialog", None))
-        self.autoToggleBox.setText(QCoreApplication.translate("TechDemoMainWindow", u"Automatic", None))
-        self.manualToggleBox.setText(QCoreApplication.translate("TechDemoMainWindow", u"Manual", None))
+        self.label.setText(QCoreApplication.translate("TechDemoMainWindow", u"Current Temperature", None))
+        self.label_2.setText(QCoreApplication.translate("TechDemoMainWindow", u"25\u00b0C", None))
+        self.label_4.setText(QCoreApplication.translate("TechDemoMainWindow", u"Current Pressure", None))
+        self.label_3.setText(QCoreApplication.translate("TechDemoMainWindow", u"760.00 Torr", None))
+        self.autoToggleBox.setText(QCoreApplication.translate("TechDemoMainWindow", u"Manual", None))
+        self.manualToggleBox.setText(QCoreApplication.translate("TechDemoMainWindow", u"Automatic", None))
         self.TempLayoutBox.setTitle("")
         self.tempTextLabel.setText(QCoreApplication.translate("TechDemoMainWindow", u"Temperature", None))
         self.tempUnitSelector.setCurrentText("")
