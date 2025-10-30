@@ -1,0 +1,37 @@
+import platform
+import sys
+
+# Try importing Windows-specific library, ignore if not available
+if platform.system() == "Windows":
+    try:
+        from windows_toasts import WindowsToaster, Toast
+    except ImportError:
+        WindowsToaster = None
+        Toast = None
+import subprocess
+
+class NotificationManager:
+    def __init__(self, title="TechDemoTest", message="Hello World"):
+        self.title = title
+        self.message = message
+        self.system = platform.system()
+
+        if self.system == "Windows" and WindowsToaster and Toast:
+            self.notifier = WindowsToaster('MainNotifier')
+            self.newNotification = Toast()
+            self.newNotification.title = self.title
+            self.newNotification.text_fields = [self.message]
+
+    def sendNotification(self):
+        if self.system == "Windows" and WindowsToaster and Toast:
+            self.notifier.show_toast(self.newNotification)
+        elif self.system == "Darwin":  # macOS
+            subprocess.run([
+                "osascript", "-e",
+                f'display notification "{self.message}" with title "{self.title}"'
+            ])
+        else:
+            print(f"Notifications not supported on {self.system}. Message: {self.title} - {self.message}")
+if __name__ == "__main__":
+    nm = NotificationManager()
+    nm.sendNotification()

@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TechDemoMainWindow</class>
+ <widget class="QDialog" name="TechDemoMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>500</width>
+    <height>529</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <widget class="QWidget" name="verticalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>50</y>
+     <width>401</width>
+     <height>421</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="MainLayout">
+    <property name="sizeConstraint">
+     <enum>QLayout::SizeConstraint::SetMinAndMaxSize</enum>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="TopHalfLayout">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>25</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <layout class="QVBoxLayout" name="CurrentPressureTempValues">
+          <property name="spacing">
+           <number>25</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <layout class="QVBoxLayout" name="TempVert">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="font">
+               <font>
+                <pointsize>16</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Current Temperature</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_2">
+              <property name="font">
+               <font>
+                <pointsize>16</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>25°C</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="PressureVert">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="font">
+               <font>
+                <pointsize>16</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Current Pressure</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_3">
+              <property name="font">
+               <font>
+                <pointsize>16</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>760.00 Torr</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="AutoManualToggleVertLayout">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>25</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="autoToggleBox">
+            <property name="font">
+             <font>
+              <pointsize>16</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Manual</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="manualToggleBox">
+            <property name="font">
+             <font>
+              <pointsize>16</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Automatic</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="HorizLine">
+      <property name="lineWidth">
+       <number>0</number>
+      </property>
+      <property name="midLineWidth">
+       <number>2</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Orientation::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="BottomHalfLayout">
+      <item>
+       <layout class="QHBoxLayout" name="TempPressureLayout">
+        <item>
+         <widget class="QGroupBox" name="TempLayoutBox">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="font">
+           <font>
+            <kerning>false</kerning>
+            <hintingpreference>PreferDefaultHinting</hintingpreference>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QGroupBox#TempLayoutBox {border:0;}</string>
+          </property>
+          <property name="title">
+           <string/>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+          <widget class="QLabel" name="tempTextLabel">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>9</y>
+             <width>171</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>16</pointsize>
+             <kerning>true</kerning>
+             <hintingpreference>PreferDefaultHinting</hintingpreference>
+            </font>
+           </property>
+           <property name="text">
+            <string>Temperature</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
+           </property>
+          </widget>
+          <widget class="QComboBox" name="tempUnitSelector">
+           <property name="geometry">
+            <rect>
+             <x>30</x>
+             <y>100</y>
+             <width>111</width>
+             <height>22</height>
+            </rect>
+           </property>
+           <property name="currentText">
+            <string/>
+           </property>
+           <property name="currentIndex">
+            <number>-1</number>
+           </property>
+          </widget>
+          <widget class="QDoubleSpinBox" name="tempValueSelector">
+           <property name="geometry">
+            <rect>
+             <x>30</x>
+             <y>72</y>
+             <width>111</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="prefix">
+            <string/>
+           </property>
+           <property name="minimum">
+            <double>25.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>1000.000000000000000</double>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="tempSubmitButton">
+           <property name="geometry">
+            <rect>
+             <x>30</x>
+             <y>130</y>
+             <width>111</width>
+             <height>24</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Submit</string>
+           </property>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="PressureLayoutBox">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox#PressureLayoutBox {border:0;}</string>
+          </property>
+          <property name="title">
+           <string/>
+          </property>
+          <widget class="QLabel" name="pressureTextLabel">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>9</y>
+             <width>171</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>16</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Pressure</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
+           </property>
+          </widget>
+          <widget class="QComboBox" name="pressureUnitSelector">
+           <property name="geometry">
+            <rect>
+             <x>30</x>
+             <y>100</y>
+             <width>111</width>
+             <height>22</height>
+            </rect>
+           </property>
+           <property name="currentText">
+            <string/>
+           </property>
+           <property name="currentIndex">
+            <number>-1</number>
+           </property>
+          </widget>
+          <widget class="QDoubleSpinBox" name="pressureValueSelector">
+           <property name="geometry">
+            <rect>
+             <x>30</x>
+             <y>72</y>
+             <width>111</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="prefix">
+            <string/>
+           </property>
+           <property name="minimum">
+            <double>0.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>1000.000000000000000</double>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pressureSubmitButton">
+           <property name="geometry">
+            <rect>
+             <x>30</x>
+             <y>130</y>
+             <width>111</width>
+             <height>24</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Submit</string>
+           </property>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

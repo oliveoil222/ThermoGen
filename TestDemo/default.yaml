@@ -1,0 +1,58 @@
+spec: "1.0"
+devices:
+  device 1:
+    eom:
+      ASRL INSTR:
+        q: "\r\n"
+        r: "\n"
+      USB INSTR:
+        q: "\n"
+        r: "\n"
+      TCPIP INSTR:
+        q: "\n"
+        r: "\n"
+      TCPIP SOCKET:
+        q: "\n"
+        r: "\n"
+      GPIB INSTR:
+        q: "\n"
+        r: "\n"
+    error: ERROR
+    dialogues:
+      - q: "*IDN?"
+        r: "LSG Serial #1234"
+      - q: "*RST"
+        r: "OK"
+      - q: "*CLS"
+        r: "OK"
+    properties:
+      current:
+        default: 0.0
+        getter:
+          q: "MEAS:CURR?"
+          r: "{:.1f}"
+        setter:
+          q: "SOUR:CURR {:.1f}"
+          r: OK
+          e: 'CURR_ERROR'
+        specs:
+          min: 0.0
+          max: 13.0
+          type: float
+      voltage:
+        default: 0.0
+        getter:
+          q: "MEAS:VOLT?"
+          r: "{:.1f}"
+        setter:
+          q: "SOUR:VOLT {:.1f}"
+          r: OK
+          e: 'VOLT'
+        specs:
+          min: 0.0
+          max: 80.0
+          type: float
+
+resources:
+  ASRL1::INSTR:
+    device: device 1
