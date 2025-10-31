@@ -115,13 +115,15 @@ class TechDemoMainWindow(QMainWindow):
     # -----------------------------
     def updateTempValue(self):
         self.autoTemp = self.ui.tempValueSelector.value()
-        self.notifier.show_message(f"Set Temperature: {self.autoTemp:.2f}")
+        unit = self.ui.tempUnitSelector.currentText()
+        self.notifier.setMessage("Temperature Set", f"Set Temperature: {self.autoTemp:.2f} {unit}")
+        self.notifier.sendNotification()
 
     def updatePressureValue(self):
         self.autoPressure = self.ui.pressureValueSelector.value()
         unit = self.ui.pressureUnitSelector.currentText()
-        self.notifier.show_message(f"Set Pressure: {self.autoPressure:.2f} {unit}")
-
+        self.notifier.setMessage("Pressure Set", f"Set Pressure: {self.autoPressure:.2f} {unit}")
+        self.notifier.sendNotification()
     # -----------------------------
     # --- THREADS ---
     # -----------------------------
@@ -130,7 +132,7 @@ class TechDemoMainWindow(QMainWindow):
         while True:
             try:
                 # Temperature display
-                if not self.isAutoOn and self.tempReader.data is not None:
+                if self.tempReader.data is not None:
                     self.ui.tempValueDisplayLabel.setText(f"{self.tempReader.data[2]:.2f}°C")
 
                 # Pressure display
@@ -158,6 +160,7 @@ class TechDemoMainWindow(QMainWindow):
                     current_pressure = self.pressureReader.read_pressure()
                     if current_pressure is not None:
                         adjusted = self.pressureWriter.adjust_pressure(current_pressure, self.autoPressure)
+                        self.pressureReader.base_pressure = adjusted
                         print(f"[PRESSURE] Current={current_pressure:.2f} Torr → Adjusted={adjusted:.2f} Torr")
             except Exception as e:
                 print(f"[GPIBThread] Error updating devices: {e}")

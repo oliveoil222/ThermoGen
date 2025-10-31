@@ -8,19 +8,17 @@ if platform.system() == "Windows":
     except ImportError:
         WindowsToaster = None
         Toast = None
+# from windows_toasts import WindowsToaster, Toast
 import subprocess
 
 class NotificationManager:
-    def __init__(self, title="TechDemoTest", message="Hello World"):
-        self.title = title
-        self.message = message
+    def __init__(self):
         self.system = platform.system()
 
         if self.system == "Windows" and WindowsToaster and Toast:
-            self.notifier = WindowsToaster('MainNotifier')
+            self.notifier = WindowsToaster('TechDemo')
             self.newNotification = Toast()
-            self.newNotification.title = self.title
-            self.newNotification.text_fields = [self.message]
+
 
     def sendNotification(self):
         if self.system == "Windows" and WindowsToaster and Toast:
@@ -32,6 +30,12 @@ class NotificationManager:
             ])
         else:
             print(f"Notifications not supported on {self.system}. Message: {self.title} - {self.message}")
+
+    def setMessage(self, title, message):
+        self.newNotification.title = title
+        self.newNotification.text_fields = [title, message]
+
+
 if __name__ == "__main__":
     nm = NotificationManager()
     nm.sendNotification()
