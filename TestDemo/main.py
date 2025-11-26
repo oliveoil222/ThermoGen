@@ -3,7 +3,7 @@ import threading
 from time import sleep
 from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtCore import Qt
-from DemoUI import Ui_TechDemoMainWindow
+from DemoUI_OLD2 import Ui_TechDemoMainWindow
 from notifications import NotificationManager
 from temperature_read import TemperatureReader
 from temperature_write import TemperatureWriter
@@ -51,13 +51,13 @@ class TechDemoMainWindow(QMainWindow):
         self.adjustTempLimits("Celsius")
 
         # Connect UI signals
-        self.ui.autoToggleBox.stateChanged.connect(self.on_autoToggleBox_stateChanged)
-        self.ui.manualToggleBox.stateChanged.connect(self.on_manualToggleBox_stateChanged)
+        # self.ui.autoToggleBox.stateChanged.connect(self.on_autoToggleBox_stateChanged)
+        # self.ui.manualToggleBox.stateChanged.connect(self.on_manualToggleBox_stateChanged)
         self.ui.pressureUnitSelector.currentTextChanged.connect(self.adjustPressureLimits)
         self.ui.tempUnitSelector.currentTextChanged.connect(self.adjustTempLimits)
         self.ui.tempSubmitButton.clicked.connect(self.updateTempValue)
         self.ui.pressureSubmitButton.clicked.connect(self.updatePressureValue)
-        self.ui.manualToggleBox.setCheckState(Qt.CheckState.Checked)
+        # self.ui.manualToggleBox.setCheckState(Qt.CheckState.Checked)
 
     def startThreads(self):
         self.displayThread = threading.Thread(target=self.updateDisplay, daemon=True)
@@ -66,24 +66,24 @@ class TechDemoMainWindow(QMainWindow):
         self.updateGPIBThread = threading.Thread(target=self.updateGPIB, daemon=True)
         self.updateGPIBThread.start()
 
-    # -----------------------------
-    # --- TOGGLE BOX HANDLERS ---
-    # -----------------------------
-    def on_autoToggleBox_stateChanged(self, state):
-        if state == 0:
-            self.ui.manualToggleBox.setCheckState(Qt.CheckState.Checked)
-            self.isAutoOn = False
-        else:
-            self.ui.manualToggleBox.setCheckState(Qt.CheckState.Unchecked)
-            self.isAutoOn = True
-
-    def on_manualToggleBox_stateChanged(self, state):
-        if state == 0:
-            self.ui.autoToggleBox.setCheckState(Qt.CheckState.Checked)
-            self.isAutoOn = True
-        else:
-            self.ui.autoToggleBox.setCheckState(Qt.CheckState.Unchecked)
-            self.isAutoOn = False
+    # # -----------------------------
+    # # --- TOGGLE BOX HANDLERS ---
+    # # -----------------------------
+    # def on_autoToggleBox_stateChanged(self, state):
+    #     if state == 0:
+    #         self.ui.manualToggleBox.setCheckState(Qt.CheckState.Checked)
+    #         self.isAutoOn = False
+    #     else:
+    #         self.ui.manualToggleBox.setCheckState(Qt.CheckState.Unchecked)
+    #         self.isAutoOn = True
+    #
+    # def on_manualToggleBox_stateChanged(self, state):
+    #     if state == 0:
+    #         self.ui.autoToggleBox.setCheckState(Qt.CheckState.Checked)
+    #         self.isAutoOn = True
+    #     else:
+    #         self.ui.autoToggleBox.setCheckState(Qt.CheckState.Unchecked)
+    #         self.isAutoOn = False
 
     # -----------------------------
     # --- LIMITS AND UNIT CONTROL ---
@@ -116,14 +116,14 @@ class TechDemoMainWindow(QMainWindow):
     def updateTempValue(self):
         self.autoTemp = self.ui.tempValueSelector.value()
         unit = self.ui.tempUnitSelector.currentText()
-        self.notifier.setMessage("Temperature Set", f"Set Temperature: {self.autoTemp:.2f} {unit}")
-        self.notifier.sendNotification()
+        self.notifier.set_message("Temperature Set", f"Set Temperature: {self.autoTemp:.2f} {unit}")
+        self.notifier.send_notification()
 
     def updatePressureValue(self):
         self.autoPressure = self.ui.pressureValueSelector.value()
         unit = self.ui.pressureUnitSelector.currentText()
-        self.notifier.setMessage("Pressure Set", f"Set Pressure: {self.autoPressure:.2f} {unit}")
-        self.notifier.sendNotification()
+        self.notifier.set_message("Pressure Set", f"Set Pressure: {self.autoPressure:.2f} {unit}")
+        self.notifier.send_notification()
     # -----------------------------
     # --- THREADS ---
     # -----------------------------

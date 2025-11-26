@@ -35,14 +35,14 @@
        <number>0</number>
       </property>
       <property name="bottomMargin">
-       <number>25</number>
+       <number>0</number>
       </property>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <layout class="QVBoxLayout" name="CurrentPressureTempValues">
           <property name="spacing">
-           <number>25</number>
+           <number>5</number>
           </property>
           <property name="leftMargin">
            <number>0</number>
@@ -53,10 +53,11 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="QLabel" name="label">
+             <widget class="QLabel" name="tempTitle">
               <property name="font">
                <font>
                 <pointsize>16</pointsize>
+                <kerning>true</kerning>
                </font>
               </property>
               <property name="text">
@@ -65,10 +66,43 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_2">
+             <widget class="QLabel" name="top_thermo">
               <property name="font">
                <font>
                 <pointsize>16</pointsize>
+                <kerning>true</kerning>
+               </font>
+              </property>
+              <property name="text">
+               <string>25°C</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="middle_thermo">
+              <property name="font">
+               <font>
+                <pointsize>16</pointsize>
+                <kerning>true</kerning>
+               </font>
+              </property>
+              <property name="text">
+               <string>25°C</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="bottom_thermo">
+              <property name="font">
+               <font>
+                <pointsize>16</pointsize>
+                <kerning>true</kerning>
                </font>
               </property>
               <property name="text">
@@ -82,15 +116,23 @@
            </layout>
           </item>
           <item>
+           <widget class="Line" name="line">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
            <layout class="QVBoxLayout" name="PressureVert">
             <property name="leftMargin">
              <number>0</number>
             </property>
             <item>
-             <widget class="QLabel" name="label_4">
+             <widget class="QLabel" name="pressureTitle">
               <property name="font">
                <font>
                 <pointsize>16</pointsize>
+                <kerning>true</kerning>
                </font>
               </property>
               <property name="text">
@@ -99,10 +141,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_3">
+             <widget class="QLabel" name="pressureDisplayLabel">
               <property name="font">
                <font>
                 <pointsize>16</pointsize>
+                <kerning>true</kerning>
                </font>
               </property>
               <property name="text">
@@ -120,33 +163,147 @@
         <item>
          <layout class="QVBoxLayout" name="AutoManualToggleVertLayout">
           <property name="spacing">
-           <number>0</number>
-          </property>
-          <property name="leftMargin">
-           <number>25</number>
+           <number>5</number>
           </property>
           <item>
-           <widget class="QCheckBox" name="autoToggleBox">
-            <property name="font">
-             <font>
-              <pointsize>16</pointsize>
-             </font>
+           <widget class="QGroupBox" name="tempAutoManualGroup">
+            <property name="title">
+             <string>GroupBox</string>
             </property>
-            <property name="text">
-             <string>Manual</string>
+            <widget class="QWidget" name="layoutWidget">
+             <property name="geometry">
+              <rect>
+               <x>-10</x>
+               <y>-10</y>
+               <width>192</width>
+               <height>101</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="AutoManualToggleTempVertLayout">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>25</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="tempAutoManualLabel">
+                <property name="font">
+                 <font>
+                  <pointsize>16</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Temperature</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="tempManualButton">
+                <property name="font">
+                 <font>
+                  <pointsize>16</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Manual</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="tempAutoButton">
+                <property name="font">
+                 <font>
+                  <pointsize>16</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Automatic</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_2">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="manualToggleBox">
-            <property name="font">
-             <font>
-              <pointsize>16</pointsize>
-             </font>
+           <widget class="QGroupBox" name="pressureAutoManualGroup">
+            <property name="title">
+             <string>GroupBox</string>
             </property>
-            <property name="text">
-             <string>Automatic</string>
-            </property>
+            <widget class="QWidget" name="layoutWidget">
+             <property name="geometry">
+              <rect>
+               <x>-10</x>
+               <y>-10</y>
+               <width>192</width>
+               <height>98</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="AutoManualTogglePressureVertLayout">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>25</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="pressureAutoManualLabel">
+                <property name="font">
+                 <font>
+                  <pointsize>16</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Pressure</string>
+                </property>
+                <property name="margin">
+                 <number>0</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="pressureManualButton">
+                <property name="font">
+                 <font>
+                  <pointsize>16</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Manual</string>
+                </property>
+                <property name="shortcut">
+                 <string>Ctrl+S</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="pressureAutoButton">
+                <property name="font">
+                 <font>
+                  <pointsize>16</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Automatic</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
            </widget>
           </item>
          </layout>

@@ -20,7 +20,7 @@ class NotificationManager:
             self.newNotification = Toast()
 
 
-    def sendNotification(self):
+    def send_notification(self):
         if self.system == "Windows" and WindowsToaster and Toast:
             self.notifier.show_toast(self.newNotification)
         elif self.system == "Darwin":  # macOS
@@ -31,11 +31,11 @@ class NotificationManager:
         else:
             print(f"Notifications not supported on {self.system}. Message: {self.title} - {self.message}")
 
-    def setMessage(self, title, message):
+    def set_message(self, title, message):
         self.newNotification.title = title
         self.newNotification.text_fields = [title, message]
 
 
 if __name__ == "__main__":
     nm = NotificationManager()
-    nm.sendNotification()
+    nm.send_notification()

@@ -28,7 +28,7 @@ class TemperatureWriter:
         return volt
 
     def write_volt(self, volt):
-        self.instrument.query("SOUR:VOLT " + str(volt))
+        return self.instrument.query("SOUR:VOLT " + str(volt))
 
     def read_volt(self):
         volt_str = self.instrument.query("MEAS:VOLT?")
