@@ -4,8 +4,9 @@ import numpy as np
 import threading
 
 class TemperatureReader:
-    def __init__(self):
+    def __init__(self, inputDevice):
         self.task = nidaqmx.Task()
+        self.inputDevice = inputDevice
         self.reader = None
         self.data = None
         self.thread = threading.Thread(target=self.start_read)
@@ -15,9 +16,9 @@ class TemperatureReader:
 
     def start_read(self):
         with self.task as task:
-            task.ai_channels.add_ai_thrmcpl_chan("Dev1/ai0", min_val=-10, max_val=20, units=nidaqmx.constants.TemperatureUnits.DEG_C, thermocouple_type=nidaqmx.constants.ThermocoupleType.K)
-            task.ai_channels.add_ai_thrmcpl_chan("Dev1/ai1", min_val=-10, max_val=20, units=nidaqmx.constants.TemperatureUnits.DEG_C, thermocouple_type=nidaqmx.constants.ThermocoupleType.K)
-            task.ai_channels.add_ai_thrmcpl_chan("Dev1/ai2", min_val=-10, max_val=20, units=nidaqmx.constants.TemperatureUnits.DEG_C, thermocouple_type=nidaqmx.constants.ThermocoupleType.K)
+            task.ai_channels.add_ai_thrmcpl_chan(self.inputDevice + "/ai0", min_val=-10, max_val=20, units=nidaqmx.constants.TemperatureUnits.DEG_C, thermocouple_type=nidaqmx.constants.ThermocoupleType.K)
+            task.ai_channels.add_ai_thrmcpl_chan(self.inputDevice + "/ai1", min_val=-10, max_val=20, units=nidaqmx.constants.TemperatureUnits.DEG_C, thermocouple_type=nidaqmx.constants.ThermocoupleType.K)
+            task.ai_channels.add_ai_thrmcpl_chan(self.inputDevice + "/ai2", min_val=-10, max_val=20, units=nidaqmx.constants.TemperatureUnits.DEG_C, thermocouple_type=nidaqmx.constants.ThermocoupleType.K)
 
             task.timing.cfg_samp_clk_timing(rate=8, sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS, samps_per_chan=100)
 

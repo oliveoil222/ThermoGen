@@ -2,10 +2,11 @@ import pyvisa
 import pyvisa_sim
 
 class TemperatureWriter:
-    def __init__(self):
-        self.rm = pyvisa.ResourceManager('default.yaml@sim')
-        # print(self.rm.list_resources())
-        self.instrument = self.rm.open_resource('ASRL1::INSTR')
+    def __init__(self, inputDevice, simFile = ""):
+
+        self.rm = pyvisa.ResourceManager(simFile)
+        self.instrument = self.rm.open_resource(inputDevice)
+
         # print(self.instrument.query("*IDN?"))
         # print(self.instrument.query("MEAS:CURR?"))
         # print(self.instrument.query("MEAS:VOLT?"))
@@ -17,7 +18,7 @@ class TemperatureWriter:
     def temp_to_volt(self, temp):
         # 0V ~= 25C
         # 80V ~= 1000C (assumption, need to confirm)
-        volt = ((80.0 * temp) /1000.0) - 2.0
+        volt = ((80.0 * temp) /800.0) - 2.0
         volt = round(volt, 2)
 
         if volt < 0:
