@@ -32,19 +32,17 @@ class TechDemoMainWindow(QMainWindow):
         if config.getboolean('SIMULATION', 'TEMP_SIMULATION'):
             self.tempSim = TemperatureSim(config.get('SIMULATION', 'TEMP_SIM_DEVICE'))
             self.tempSim.temperature = 25.0
-            # self.tempSim.startSim()
+            self.tempSim.targetTemperature = 25.0
             self.ui.tempSubmitButton.clicked.connect(self.updateTempValueSim)
         else:
             self.tempReader = TemperatureReader(config.get('TEMPERATURE', 'TEMP_INPUT_DEVICE'))
             self.tempWriter = TemperatureWriter(config.get('TEMPERATURE', 'TEMP_OUTPUT_DEVICE'))
             self.ui.tempSubmitButton.clicked.connect(self.updateTempValue)
 
-
-
         if config.getboolean('SIMULATION', 'PRESSURE_SIMULATION'):
-            # self.pressureSim = PressureSim(config.get('SIMULATION', 'PRESSURE_SIM_DEVICE'))
-            # self.pressureSim.voltage = 0.0
-            # self.pressureSim.startSim()
+            self.pressureSim = PressureSim(config.get('SIMULATION', 'PRESSURE_SIM_DEVICE'))
+            self.pressureSim.pressure = 760.0
+            self.pressureSim.targetPressure = 760.0
             self.ui.pressureSubmitButton.clicked.connect(self.updatePressureValueSim)
 
         else:
@@ -89,7 +87,9 @@ class TechDemoMainWindow(QMainWindow):
         # self.ui.autoToggleBox.stateChanged.connect(self.on_autoToggleBox_stateChanged)
         # self.ui.manualToggleBox.stateChanged.connect(self.on_manualToggleBox_stateChanged)
         self.ui.radioButton.toggled.connect(self.on_radioButton_1_stateChanged)
+        self.ui.radioButton_2.toggled.connect(self.on_radioButton_2_stateChanged)
         self.ui.radioButton_3.toggled.connect(self.on_radioButton_3_stateChanged)
+        self.ui.radioButton_4.toggled.connect(self.on_radioButton_4_stateChanged)
         self.ui.pressureUnitSelector.currentTextChanged.connect(self.adjustPressureLimits)
         self.ui.tempUnitSelector.currentTextChanged.connect(self.adjustTempLimits)
         # self.ui.manualToggleBox.setCheckState(Qt.CheckState.Checked)
@@ -128,14 +128,24 @@ class TechDemoMainWindow(QMainWindow):
     def on_radioButton_1_stateChanged(self, state):
         if state == 1:
             print("START")
-            self.tempSim.thread.start()
+            # self.tempSim.startSim()
+
+    def on_radioButton_2_stateChanged(self, state):
+        if state == 1:
+            # print("STOP")
+            # self.tempSim.stopSim()
+            pass
 
     def on_radioButton_3_stateChanged(self, state):
         if state == 1:
-            self.pressureSim.thread.start()
+            print("START")
+            self.pressureSim.resumeSim()
 
-
-
+    def on_radioButton_4_stateChanged(self, state):
+        if state == 1:
+            # print("STOP")
+            # self.pressureSim.pauseSim()
+            pass
 
     # -----------------------------
     # --- LIMITS AND UNIT CONTROL ---
@@ -194,12 +204,13 @@ class TechDemoMainWindow(QMainWindow):
         self.notifier.send_notification()
 
     def sendCompletePressureNotification(self):
-        self.notifier.set_message("Pressure Target Reached", f"Pressure has reach target value of {self.autoPressure:.2f} {self.ui.pressureUnitSelector.currentText()}")
+        self.notifier.set_message("Pressure Target Reached", f"Pressure has reached target value of {self.autoPressure:.2f} {self.ui.pressureUnitSelector.currentText()}")
         self.notifier.send_notification()
 
     def sendCompleteTempNotification(self):
-        self.notifier.set_message("Temperature Target Reached", f"Temperature has reach target value of {self.autoTemp:.2f} {self.ui.tempUnitSelector.currentText()}")
+        self.notifier.set_message("Temperature Target Reached",f"Temperature has reached target value of {self.autoTemp:.2f} {self.ui.tempUnitSelector.currentText()}")
         self.notifier.send_notification()
+        print("SENDING NOTIFICATION")
     # -----------------------------
     # --- THREADS ---
     # -----------------------------
@@ -231,17 +242,17 @@ class TechDemoMainWindow(QMainWindow):
                     self.ui.middle_thermo.setText(f"{self.tempSim.temperature:.2f}°C")
                     self.ui.bottom_thermo.setText(f"{self.tempSim.temperature:.2f}°C")
 
-                # if self.pressureSim.pressure is not None:
-                #     self.ui.pressureValueDisplayLabel.setText(f"{self.pressureSim.pressure:.2f} Torr")
+                if self.pressureSim.pressure is not None:
+                    self.ui.pressureValueDisplayLabel.setText(f"{self.pressureSim.pressure:.2f} Torr")
 
-                if self.tempSim.temperature == self.tempSim.targetTemperature:
-                    self.sendCompleteTempNotification()
+                # if self.tempSim.temperature == self.tempSim.targetTemperature:
+                #     print("SENDING NOTIFICATION pt1")
+                #     self.notifier.set_message("Temperature Target Reached",f"Temperature has reach target value of {self.autoTemp:.2f} {self.ui.tempUnitSelector.currentText()}")
+                #     print("SENDING NOTIFICATION pt2")
+                #     self.notifier.send_notification()
+                #     self.sendCompleteTempNotification()
+                #     print("NOTIFICATION SENT")
 
-
-                # if round(self.pressureSim.targetPressure,2) == round(self.pressureSim.pressure,2) and self.notification_sent == False:
-                #     print("SENDING NOTIFICATION")
-                #     self.sendCompletePressureNotification()
-                #     self.notification_sent = True
 
 
             except Exception as e:

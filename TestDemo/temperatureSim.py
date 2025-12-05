@@ -4,10 +4,10 @@ from time import sleep
 
 class TemperatureSim:
     def __init__(self, simPort = "COM4", baudrate = 115200):
-        self.ser = serial.Serial("COM4", baudrate)
+        self.ser = serial.Serial(simPort, baudrate)
         self.voltage = 0.0
         self.temperature = 25.00
-        self.targetTemperature = 500.00
+        self.targetTemperature = 25.00
         self.thread = threading.Thread(target=self.startSim)
         self.thread.daemon = True
 
