@@ -2,19 +2,24 @@ import sys
 import threading
 from time import sleep
 from PySide6.QtWidgets import QApplication, QMainWindow
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal, QObject
 
-import pressureSim
+import configparser
 from DemoUI import Ui_TechDemoMainWindow
 from notifications import NotificationManager
 from pressureSim import PressureSim
+from temperatureSim import TemperatureSim
 from temperature_read import TemperatureReader
 from temperature_write import TemperatureWriter
 from pressure_read import PressureReader
 from pressure_write import PressureWriter
-from temperatureSim import TemperatureSim
-from pressureSim import PressureSim
-import configparser
+
+
+# ----------------------------------------------------
+# Thread-safe notification dispatcher
+# ----------------------------------------------------
+class NotificationDispatcher(QObject):
+    notify = Signal(str, str)
 
 
 class TechDemoMainWindow(QMainWindow):
@@ -26,9 +31,18 @@ class TechDemoMainWindow(QMainWindow):
         self.ui = Ui_TechDemoMainWindow()
         self.ui.setupUi(self)
 
-        # Core modules
+        # Notification system
         self.notifier = NotificationManager()
-        self.notification_sent = False
+        self.dispatcher = NotificationDispatcher()
+        self.dispatcher.notify.connect(self._send_notification_safe)
+
+        # State flags
+        self.temp_notification_sent = True
+        self.pressure_notification_sent = True
+
+        # ----------------------------------------------------
+        # Temperature Setup
+        # ----------------------------------------------------
         if config.getboolean('SIMULATION', 'TEMP_SIMULATION'):
             self.tempSim = TemperatureSim(config.get('SIMULATION', 'TEMP_SIM_DEVICE'))
             self.tempSim.temperature = 25.0
@@ -39,249 +53,247 @@ class TechDemoMainWindow(QMainWindow):
             self.tempWriter = TemperatureWriter(config.get('TEMPERATURE', 'TEMP_OUTPUT_DEVICE'))
             self.ui.tempSubmitButton.clicked.connect(self.updateTempValue)
 
+        # ----------------------------------------------------
+        # Pressure Setup
+        # ----------------------------------------------------
         if config.getboolean('SIMULATION', 'PRESSURE_SIMULATION'):
             self.pressureSim = PressureSim(config.get('SIMULATION', 'PRESSURE_SIM_DEVICE'))
             self.pressureSim.pressure = 760.0
             self.pressureSim.targetPressure = 760.0
             self.ui.pressureSubmitButton.clicked.connect(self.updatePressureValueSim)
-
         else:
-            self.pressureWriter = PressureWriter()
             self.pressureReader = PressureReader()
+            self.pressureWriter = PressureWriter()
             self.ui.pressureSubmitButton.clicked.connect(self.updatePressureValue)
-
-
-        # Threads and state
-        self.displayThread = None
-        self.updateGPIBThread = None
-
-        # Dont need, just check state of radio button.
-        # Buttons 1 & 2 are for temperature control.
-        # buttons 3 & 4 are for pressure control.
-        # 1 & 3 are automatic, 2 & 4 are manual.
-        # self.isTempAutoOn = False
-        # self.isPressureAutoOn = False
 
         self.autoTemp = 25.0
         self.autoPressure = 760.0
 
-        # Setup the UI
+        # UI setup
         self.setupUI()
 
-        # Start background threads
-        self.startThreads(config.getboolean('SIMULATION', 'TEMP_SIMULATION'))
+        # Threads
+        self.displayThread = None
+        self.updateGPIBThread = None
+        self.startThreads(config.getboolean('SIMULATION', 'TEMP_SIMULATION'),
+                          config.getboolean('SIMULATION', 'PRESSURE_SIMULATION'))
 
-    # -----------------------------
-    # --- UI Setup ---
-    # -----------------------------
+    # ----------------------------------------------------
+    # Notification Safe Method
+    # ----------------------------------------------------
+    def _send_notification_safe(self, title, message):
+        self.notifier.set_message(title, message)
+        self.notifier.send_notification()
+
+    # ----------------------------------------------------
+    # UI Setup
+    # ----------------------------------------------------
     def setupUI(self):
-        # Add pressure units
         self.ui.pressureUnitSelector.addItems(["Torr", "kPa", "atm"])
         self.adjustPressureLimits("Torr")
 
-        # Add temperature units
         self.ui.tempUnitSelector.addItems(["Celsius", "Fahrenheit", "Kelvin"])
         self.adjustTempLimits("Celsius")
 
-        # Connect UI signals
-        # self.ui.autoToggleBox.stateChanged.connect(self.on_autoToggleBox_stateChanged)
-        # self.ui.manualToggleBox.stateChanged.connect(self.on_manualToggleBox_stateChanged)
         self.ui.radioButton.toggled.connect(self.on_radioButton_1_stateChanged)
         self.ui.radioButton_2.toggled.connect(self.on_radioButton_2_stateChanged)
         self.ui.radioButton_3.toggled.connect(self.on_radioButton_3_stateChanged)
         self.ui.radioButton_4.toggled.connect(self.on_radioButton_4_stateChanged)
         self.ui.pressureUnitSelector.currentTextChanged.connect(self.adjustPressureLimits)
         self.ui.tempUnitSelector.currentTextChanged.connect(self.adjustTempLimits)
-        # self.ui.manualToggleBox.setCheckState(Qt.CheckState.Checked)
 
-    def startThreads(self, isSimulated):
-
-        if not isSimulated:
-            self.displayThread = threading.Thread(target=self.updateDisplay, daemon=True)
-            self.displayThread.start()
-
-            self.updateGPIBThread = threading.Thread(target=self.updateGPIB, daemon=True)
-            self.updateGPIBThread.start()
-        else:
+    # ----------------------------------------------------
+    # Thread Startup
+    # ----------------------------------------------------
+    def startThreads(self, tempSimulated, pressureSimulated):
+        if tempSimulated or pressureSimulated:
             self.displayThread = threading.Thread(target=self.updateDisplaySimulation, daemon=True)
             self.displayThread.start()
+        else:
+            self.displayThread = threading.Thread(target=self.updateDisplay, daemon=True)
+            self.displayThread.start()
+            self.updateGPIBThread = threading.Thread(target=self.updateGPIB, daemon=True)
+            self.updateGPIBThread.start()
 
-    # # -----------------------------
-    # # --- TOGGLE BOX HANDLERS ---
-    # # -----------------------------
-    # def on_autoToggleBox_stateChanged(self, state):
-    #     if state == 0:
-    #         self.ui.manualToggleBox.setCheckState(Qt.CheckState.Checked)
-    #         self.isAutoOn = False
-    #     else:
-    #         self.ui.manualToggleBox.setCheckState(Qt.CheckState.Unchecked)
-    #         self.isAutoOn = True
-    #
-    # def on_manualToggleBox_stateChanged(self, state):
-    #     if state == 0:
-    #         self.ui.autoToggleBox.setCheckState(Qt.CheckState.Checked)
-    #         self.isAutoOn = True
-    #     else:
-    #         self.ui.autoToggleBox.setCheckState(Qt.CheckState.Unchecked)
-    #         self.isAutoOn = False
-
+    # ----------------------------------------------------
+    # Radio Button Handlers
+    # ----------------------------------------------------
     def on_radioButton_1_stateChanged(self, state):
-        if state == 1:
-            print("START")
-            # self.tempSim.startSim()
+        if state == 1 and hasattr(self, 'tempSim'):
+            self.tempSim.startSim()
 
     def on_radioButton_2_stateChanged(self, state):
-        if state == 1:
-            # print("STOP")
-            # self.tempSim.stopSim()
-            pass
+        if state == 1 and hasattr(self, 'tempSim'):
+            self.tempSim.pauseSim()
 
     def on_radioButton_3_stateChanged(self, state):
-        if state == 1:
-            print("START")
-            self.pressureSim.resumeSim()
+        if state == 1 and hasattr(self, 'pressureSim'):
+            self.pressureSim.startSim()
 
     def on_radioButton_4_stateChanged(self, state):
-        if state == 1:
-            # print("STOP")
-            # self.pressureSim.pauseSim()
-            pass
+        if state == 1 and hasattr(self, 'pressureSim'):
+            self.pressureSim.pauseSim()
 
-    # -----------------------------
-    # --- LIMITS AND UNIT CONTROL ---
-    # -----------------------------
+    # ----------------------------------------------------
+    # Limit Adjustments
+    # ----------------------------------------------------
     def adjustPressureLimits(self, unit):
         if unit == "Torr":
-            self.ui.pressureValueSelector.setRange(0.0, 760.0)
-            self.ui.pressureValueSelector.setValue(760.0)
+            self.ui.pressureValueSelector.setRange(0, 760)
+            self.ui.pressureValueSelector.setValue(760)
         elif unit == "kPa":
-            self.ui.pressureValueSelector.setRange(0.0, 101.325)
+            self.ui.pressureValueSelector.setRange(0, 101.325)
             self.ui.pressureValueSelector.setValue(101.325)
-        elif unit == "atm":
-            self.ui.pressureValueSelector.setRange(0.0, 1.0)
-            self.ui.pressureValueSelector.setValue(1.0)
+        else:  # atm
+            self.ui.pressureValueSelector.setRange(0, 1)
+            self.ui.pressureValueSelector.setValue(1)
 
     def adjustTempLimits(self, unit):
         if unit == "Celsius":
-            self.ui.tempValueSelector.setRange(0.0, 1250.0)
-            self.ui.tempValueSelector.setValue(25.0)
+            self.ui.tempValueSelector.setRange(0, 1250)
+            self.ui.tempValueSelector.setValue(25)
         elif unit == "Fahrenheit":
-            self.ui.tempValueSelector.setRange(32.0, 2282.0)
-            self.ui.tempValueSelector.setValue(77.0)
-        elif unit == "Kelvin":
+            self.ui.tempValueSelector.setRange(32, 2282)
+            self.ui.tempValueSelector.setValue(77)
+        else:
             self.ui.tempValueSelector.setRange(273.15, 1523.15)
             self.ui.tempValueSelector.setValue(298.15)
 
-    # -----------------------------
-    # --- UI VALUE UPDATES ---
-    # -----------------------------
+    # ----------------------------------------------------
+    # Temperature & Pressure Setters
+    # ----------------------------------------------------
     def updateTempValue(self):
         self.autoTemp = self.ui.tempValueSelector.value()
         unit = self.ui.tempUnitSelector.currentText()
-        self.notifier.set_message("Temperature Set", f"Set Temperature: {self.autoTemp:.2f} {unit}")
-        self.notifier.send_notification()
-
-    def updatePressureValue(self):
-        self.autoPressure = self.ui.pressureValueSelector.value()
-        unit = self.ui.pressureUnitSelector.currentText()
-        self.notifier.set_message("Pressure Set", f"Set Pressure: {self.autoPressure:.2f} {unit}")
-        self.notifier.send_notification()
+        self.dispatcher.notify.emit("Temperature Set",
+                                    f"Set Temperature: {self.autoTemp:.2f} {unit}")
+        self.temp_notification_sent = False
 
     def updateTempValueSim(self):
         self.autoTemp = self.ui.tempValueSelector.value()
         self.tempSim.targetTemperature = self.autoTemp
         unit = self.ui.tempUnitSelector.currentText()
-        self.notifier.set_message("Temperature Set", f"Set Temperature: {self.autoTemp:.2f} {unit}")
-        self.notifier.send_notification()
+        self.dispatcher.notify.emit("Temperature Set",
+                                    f"Set Temperature: {self.autoTemp:.2f} {unit}")
+        self.temp_notification_sent = False
+
+    def updatePressureValue(self):
+        self.autoPressure = self.ui.pressureValueSelector.value()
+        unit = self.ui.pressureUnitSelector.currentText()
+        self.dispatcher.notify.emit("Pressure Set",
+                                    f"Set Pressure: {self.autoPressure:.2f} {unit}")
+        self.pressure_notification_sent = False
 
     def updatePressureValueSim(self):
         self.autoPressure = self.ui.pressureValueSelector.value()
-        # print(self.autoPressure)
         self.pressureSim.targetPressure = self.autoPressure
-        # print(self.pressureSim.targetPressure)
         unit = self.ui.pressureUnitSelector.currentText()
-        self.notifier.set_message("Pressure Set", f"Set Pressure: {self.autoPressure:.2f} {unit}")
-        self.notifier.send_notification()
+        self.dispatcher.notify.emit("Pressure Set",
+                                    f"Set Pressure: {self.autoPressure:.2f} {unit}")
+        self.pressure_notification_sent = False
 
-    def sendCompletePressureNotification(self):
-        self.notifier.set_message("Pressure Target Reached", f"Pressure has reached target value of {self.autoPressure:.2f} {self.ui.pressureUnitSelector.currentText()}")
-        self.notifier.send_notification()
-
-    def sendCompleteTempNotification(self):
-        self.notifier.set_message("Temperature Target Reached",f"Temperature has reached target value of {self.autoTemp:.2f} {self.ui.tempUnitSelector.currentText()}")
-        self.notifier.send_notification()
-        print("SENDING NOTIFICATION")
-    # -----------------------------
-    # --- THREADS ---
-    # -----------------------------
-    def updateDisplay(self):
-        """Continuously updates live readings on the UI."""
+    # ----------------------------------------------------
+    # Display Threads (Hardware vs Simulation)
+    # ----------------------------------------------------
+    def updateDisplaySimulation(self):
         while True:
             try:
-                # Temperature display
+                # TEMPERATURE
+                t = getattr(self.tempSim, 'temperature', None)
+                if t is not None:
+                    self.ui.top_thermo.setText(f"{t:.2f}°C")
+                    self.ui.middle_thermo.setText(f"{t:.2f}°C")
+                    self.ui.bottom_thermo.setText(f"{t:.2f}°C")
+
+                # PRESSURE
+                p = getattr(self.pressureSim, 'pressure', None)
+                if p is not None:
+                    self.ui.pressureValueDisplayLabel.setText(f"{p:.2f} Torr")
+
+                # Temperature notification
+                if t is not None and abs(t - self.autoTemp) < 0.1 and not self.temp_notification_sent and self.ui.radioButton.isChecked():
+                    self.dispatcher.notify.emit(
+                        "Temperature Target Reached",
+                        f"Temperature has reached {self.autoTemp:.2f} {self.ui.tempUnitSelector.currentText()}"
+                    )
+                    self.temp_notification_sent = True
+
+                # Pressure notification
+                if p is not None and abs(p - self.autoPressure) < 0.1 and not self.pressure_notification_sent:
+                    self.dispatcher.notify.emit(
+                        "Pressure Target Reached",
+                        f"Pressure has reached {self.autoPressure:.2f} {self.ui.pressureUnitSelector.currentText()}"
+                    )
+                    self.pressure_notification_sent = True
+
+            except Exception as e:
+                print(f"[DisplayThread] Error: {e}")
+
+            sleep(0.5)
+
+    def updateDisplay(self):
+        while True:
+            try:
+                # Hardware temperature values
                 if self.tempReader.data is not None:
                     self.ui.top_thermo.setText(f"{self.tempReader.data[0]:.2f}°C")
                     self.ui.middle_thermo.setText(f"{self.tempReader.data[1]:.2f}°C")
                     self.ui.bottom_thermo.setText(f"{self.tempReader.data[2]:.2f}°C")
 
-                # Pressure display
+                # Hardware pressure
                 pressure_value = self.pressureReader.read_pressure()
                 if pressure_value is not None:
                     self.ui.pressureValueDisplayLabel.setText(f"{pressure_value:.2f} Torr")
 
-            except Exception as e:
-                print(f"[DisplayThread] Error updating display: {e}")
-            sleep(1)
+                # Completion notifications
+                if abs(self.tempReader.data[0] - self.autoTemp) < 0.1 and not self.temp_notification_sent:
+                    self.dispatcher.notify.emit(
+                        "Temperature Target Reached",
+                        f"Temperature has reached {self.autoTemp:.2f}°C"
+                    )
+                    self.temp_notification_sent = True
 
-    def updateDisplaySimulation(self):
-
-        while True:
-            try:
-                if self.tempSim.temperature is not None:
-                    self.ui.top_thermo.setText(f"{self.tempSim.temperature:.2f}°C")
-                    self.ui.middle_thermo.setText(f"{self.tempSim.temperature:.2f}°C")
-                    self.ui.bottom_thermo.setText(f"{self.tempSim.temperature:.2f}°C")
-
-                if self.pressureSim.pressure is not None:
-                    self.ui.pressureValueDisplayLabel.setText(f"{self.pressureSim.pressure:.2f} Torr")
-
-                # if self.tempSim.temperature == self.tempSim.targetTemperature:
-                #     print("SENDING NOTIFICATION pt1")
-                #     self.notifier.set_message("Temperature Target Reached",f"Temperature has reach target value of {self.autoTemp:.2f} {self.ui.tempUnitSelector.currentText()}")
-                #     print("SENDING NOTIFICATION pt2")
-                #     self.notifier.send_notification()
-                #     self.sendCompleteTempNotification()
-                #     print("NOTIFICATION SENT")
-
-
+                if abs(pressure_value - self.autoPressure) < 0.1 and not self.pressure_notification_sent:
+                    self.dispatcher.notify.emit(
+                        "Pressure Target Reached",
+                        f"Pressure has reached {self.autoPressure:.2f} Torr"
+                    )
+                    self.pressure_notification_sent = True
 
             except Exception as e:
                 print(f"[DisplayThread] Error updating display: {e}")
+
             sleep(1)
 
+    # ----------------------------------------------------
+    # Hardware GPIB Thread
+    # ----------------------------------------------------
     def updateGPIB(self):
-        """Automatic control for temperature and pressure."""
         while True:
             try:
+                # AUTOMATIC TEMPERATURE
                 if self.ui.radioButton.isChecked():
-                    # --- Temperature control ---
                     targetVolt = self.tempWriter.temp_to_volt(self.autoTemp)
                     currentVolt = self.tempWriter.read_volt()
                     if abs(currentVolt - targetVolt) > 0.01:
                         self.tempWriter.write_volt(targetVolt)
-                        print(f"[TEMP] Target={targetVolt:.2f}V, Current={currentVolt:.2f}V")
+
+                # AUTOMATIC PRESSURE
                 if self.ui.radioButton_3.isChecked():
-                    # --- Pressure control ---
                     current_pressure = self.pressureReader.read_pressure()
                     if current_pressure is not None:
                         adjusted = self.pressureWriter.adjust_pressure(current_pressure, self.autoPressure)
                         self.pressureReader.base_pressure = adjusted
-                        print(f"[PRESSURE] Current={current_pressure:.2f} Torr → Adjusted={adjusted:.2f} Torr")
+
             except Exception as e:
-                print(f"[GPIBThread] Error updating devices: {e}")
+                print(f"[GPIBThread] Error: {e}")
+
             sleep(1)
 
 
+# ----------------------------------------------------
+# Run Application
+# ----------------------------------------------------
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = TechDemoMainWindow()

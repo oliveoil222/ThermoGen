@@ -8,18 +8,28 @@ class TemperatureSim:
         self.voltage = 0.0
         self.temperature = 25.00
         self.targetTemperature = 25.00
-        self.thread = threading.Thread(target=self.startSim)
+        self._run_event = threading.Event()
+        self.thread = threading.Thread(target=self._loop)
         self.thread.daemon = True
+        self.thread.start()
 
-    def startSim(self):
+    def _loop(self):
         while True:
-            print("writing")
-            self.ser.write(self.getTemperatureString().encode())
-            print("written")
-            print("reading")
-            self.getTemperatureFromString(self.ser.readline())
-            print(self.temperature)
-            print("read")
+            if self._run_event.is_set():
+                try:
+                    self.ser.write(self.getTemperatureString().encode())
+                    self.getTemperatureFromString(self.ser.readline())
+                except Exception:
+                    pass
+            else:
+                sleep(0.1)
+
+    # Backwards-compatible API
+    def startSim(self):
+        self._run_event.set()
+
+    def pauseSim(self):
+        self._run_event.clear()
 
     def voltageFromTemperature(self):
         self.voltage = ((80.0 * self.targetTemperature) / 800.0) - 2.0
